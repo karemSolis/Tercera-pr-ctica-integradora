@@ -15,10 +15,8 @@ const usersSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: "carritos", 
     },
-    role: { // roll
-        type: String,
-        default: "user",
-    },
+    role: { type: String, enum: ['user', 'admin', 'premium'], default: 'user' },
+    
 });
 
 export const usersModel = mongoose.model(usersCollection, usersSchema);
