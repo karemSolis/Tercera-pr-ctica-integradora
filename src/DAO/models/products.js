@@ -1,19 +1,20 @@
 //CREANDO EL ESQUEMA O ESTRUCTUR DE LOS DATOS QUE SE GUARDARÁN EN ATLAS
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const productCollection = "productos" //la colección para atlas 
+const productCollection = "productos"; // la colección para Atlas
 
-//el schema
+// el schema
 const productSchema = mongoose.Schema({
-    product: String,
-    description: String,
-    price: Number,
-})
+  product: String,
+  description: String,
+  price: Number,
+  owner: { type: Schema.Types.ObjectId, ref: 'User', default: 'admin' },
+});
 
-//se crea la constante para exportar 
-const productModel = mongoose.model(productCollection, productSchema)
+// se crea la constante para exportar
+const productModel = mongoose.model(productCollection, productSchema);
 
-export default productModel
+export default productModel;
 
 /*
 
