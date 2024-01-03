@@ -50,8 +50,32 @@ jwtEstrategy.post("/login", async (req, res) => {
     res.send({ status: "success", access_token });
 });
 
-jwtEstrategy.get("/current", authToken, (req, res)=>{
-    res.send({status:"success", payload:req.user})
-})
+jwtEstrategy.get("/current", authToken, async (req, res) => {
+    try {
+        res.send({ status: "success", payload: req.user });
+    } catch (error) {
+        logger.error("Error al obtener el usuario actual:", error);
+        res.status(500).send({ status: "error", error: "Error al obtener el usuario actual" });
+    }
+});
+
+
+//ejemplo: 
+
+/*  jwtEstrategy.get("/current", authToken, async (req, res) => {
+    try {
+    const userResponse = {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        // Otros campos necesarios
+    };
+    res.send({ status: "success", user: userResponse });
+    } catch (error) {
+    logger.error("Error al obtener el usuario actual:", error);
+    res.status(500).send({ status: "error", error: "Error al obtener el usuario actual" });
+    }
+});*/
+
 
 export default jwtEstrategy;

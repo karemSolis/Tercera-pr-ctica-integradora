@@ -3,7 +3,7 @@ import { engine } from "express-handlebars";
 import mongoose from "mongoose";
 import MongoStore from "connect-mongo"
 import session from 'express-session'
-import FileStore from 'session-file-store'
+//import  FileStore  from 'session-file-store';
 import passport from "passport";
 import * as path from "path" 
 
@@ -17,11 +17,11 @@ import jwtEstrategy from "./router/jwt.routes.js";
 import userRouter from "./router/users.routes.js";
 import ordersRouter from "./router/orders.router.js";
 import loggerRoutes from "./router/logger.router.js";
- //Desafío mocking y manejo de errores
 
 
 
-import initializaPassport from "./config/passport.config.js"; 
+
+import{initializaPassport} from "./config/passport.config.js"; 
 import __dirname from "./utils.js"; 
 
 import config from "./config/config.js";
@@ -35,6 +35,8 @@ const app = express();
 const product = new ProductsDao();
 const carts = new CartDao();
 //const userManager = new UserManager();
+
+
 
 
 app.use(express.json());
@@ -77,7 +79,7 @@ app.use(session(sessionOptions));
 
 
 //passport.config
-(initializaPassport())
+initializaPassport()
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -94,6 +96,7 @@ app.use("/", loggerRoutes);
 app.use("/api/productos", productRouter) 
 app.use("/api/carritos", CartRouter);
 app.use("/api/sessions", userRouter)
+app.use("api/sessions/current", userRouter)
 app.use("/api/jwt", jwtEstrategy)
 app.use("/api/orders", ordersRouter)
 
@@ -209,8 +212,6 @@ app.get("/logout", (req, res) => {
   });
 });
 
-
-//------------------------------------
 
 
 

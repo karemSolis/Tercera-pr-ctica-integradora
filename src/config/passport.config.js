@@ -6,12 +6,18 @@ import local from "passport-local"
 import usersDao from "../DAO/classes/users.dao.js"
 import logger from "../controllers/logger.js"
 
+import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
+
+
+
+
 const localStrategy = local.Strategy
 
-const UsersDao = new usersDao(); 
+const UsersDao = new usersDao();
+
 
 const initializaPassport = () => {
-    passport.use('formRegister', new localStrategy({passReqToCallback: true, usernameField: "email"}, async (req, username, password, done) => {
+    passport.use('formRegister', new localStrategy({ passReqToCallback: true, usernameField: "email" }, async (req, username, password, done) => {
         const { first_name, last_name, email, age, rol } = req.body;
 
         try {
@@ -52,69 +58,89 @@ const initializaPassport = () => {
 
     passport.use('login', new localStrategy({ usernameField: "email" }, async (username, password, done) => {
 
-    try {
-        const user = await UsersDao.findEmail({ email: username });
-        if (!user) {
-            logger.debug("No se encuentra al usuario o no existe");
-            return done(null, false);
+        try {
+            const user = await UsersDao.findEmail({ email: username });
+            if (!user) {
+                logger.debug("No se encuentra al usuario o no existe");
+                return done(null, false);
+            }
+
+
+            if (!isValidPassword(user, password)) {
+                logger.debug("La contraseña no es válida");
+                return done(null, false);
+            }
+
+
+            return done(null, user);
+        } catch (error) {
+            return done(error);
         }
-        
+    }));
 
-        if (!isValidPassword(user, password)) {
-            logger.debug("La contraseña no es válida");
-            return done(null, false);
+    //--------- Estrategia JWT -----------
+    passport.use(new JwtStrategy({
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey: 'coderJsonWebToken', 
+    }, async (jwtPayload, done) => {
+        try {
+            // jwtPayload contendrá la información del usuario
+            const user = await UsersDao.getUserById(jwtPayload.user._id);
+
+            if (!user) {
+                return done(null, false);
+            }
+
+            return done(null, user);
+        } catch (error) {
+            return done(error, false);
         }
-        
-
-        return done(null, user);
-    } catch (error) {
-        return done(error);
-    }
-}));
+    }));
 
 
- //_________________ESTRATEGIA DE AUTENTIFICACIÓN DE PASSPORT-GITHUB (GitHubStrategy)________________
-         ////Configuración de Passport-GitHub:
-     passport.use('github', new GitHubStrategy({ //establece una estrategia de autentificación con el nombre github y crea una nueva instancia de la estrategia de aut.de github
-         clientID:"Iv1.1cce9042759205e6", //identificador único de tu app en github
-         clientSecret:"ec77c739b76d5d416dd4393f2a970bcdbe1406a3", //clave secreta asociada a mi app de github
-         callbackURL:"http://localhost:8080/api/sessions/githubcallback" //la URL a la que GitHub redirigirá después de que un usuario haya autenticado con éxito. //se puede poner cualquier url mientras que corresponda al localhost8080 que es el puerto que estamos usando
-        
-         ////Manejo de la autenticación:
-     }, async(accessToken, refreshToken, profile, done)=>{ //lA FIRMA DE LA FUNCIÓN//es una función asincrónica que maneja la autenticación una vez que GitHub ha devuelto la información del perfil del usuario.
-         //accesToken: token de acceso utilizado para realizar acciones en nombre del usuario autentificado, en el contexto de github este token permite a la app realizar operaciones en la cuenta del usuario que ha iniciado sesión.
-         //refreshToken: token parobteber un nuevo accessToken cuando el actual expira.
-         //profile: objeto que contiene la información del perfil del usuario obtenida en github, el profile.__json.email se usa para acceder al correo electrónico del usuario.
-         //done:se utiliza para indicar a passport si la utentificación fue exitosa y proporcionar información sobre el usuario autentificado. 
-         try {
-             logger.debug(profile)
-         ////Verificación del Usuario:
-             let user = await UsersDao.findEmail({ email: profile.__json.email }) //busca en la base de datos si ya existe un usuario con la dirección de correo electrónico proporcionada por GitHub.
-             if(!user){ //si usuario no existe 
-         ////Creación de un Nuevo Usuario:
-                 let newUser = { //vamos a crear un nuevo usuario 
-                     first_name: profile.__json.name,
-                     last_name: "github",
-                     age:20,
-                     email:profile.__json.email,
-                     rol: "admin", //cuando pongo usuario no abre con el botón "ingresar con github"?
-                     password:"",
+    //_________________ESTRATEGIA DE AUTENTIFICACIÓN DE PASSPORT-GITHUB (GitHubStrategy)________________
+    ////Configuración de Passport-GitHub:
+    passport.use('github', new GitHubStrategy({ //establece una estrategia de autentificación con el nombre github y crea una nueva instancia de la estrategia de aut.de github
+        clientID: "Iv1.1cce9042759205e6", //identificador único de tu app en github
+        clientSecret: "ec77c739b76d5d416dd4393f2a970bcdbe1406a3", //clave secreta asociada a mi app de github
+        callbackURL: "http://localhost:8080/api/sessions/githubcallback" //la URL a la que GitHub redirigirá después de que un usuario haya autenticado con éxito. //se puede poner cualquier url mientras que corresponda al localhost8080 que es el puerto que estamos usando
 
-                 }
+        ////Manejo de la autenticación:
+    }, async (accessToken, refreshToken, profile, done) => { //lA FIRMA DE LA FUNCIÓN//es una función asincrónica que maneja la autenticación una vez que GitHub ha devuelto la información del perfil del usuario.
+        //accesToken: token de acceso utilizado para realizar acciones en nombre del usuario autentificado, en el contexto de github este token permite a la app realizar operaciones en la cuenta del usuario que ha iniciado sesión.
+        //refreshToken: token parobteber un nuevo accessToken cuando el actual expira.
+        //profile: objeto que contiene la información del perfil del usuario obtenida en github, el profile.__json.email se usa para acceder al correo electrónico del usuario.
+        //done:se utiliza para indicar a passport si la utentificación fue exitosa y proporcionar información sobre el usuario autentificado. 
+        try {
+            logger.debug(profile)
+            ////Verificación del Usuario:
+            let user = await UsersDao.findEmail({ email: profile.__json.email }) //busca en la base de datos si ya existe un usuario con la dirección de correo electrónico proporcionada por GitHub.
+            if (!user) { //si usuario no existe 
+                ////Creación de un Nuevo Usuario:
+                let newUser = { //vamos a crear un nuevo usuario 
+                    first_name: profile.__json.name,
+                    last_name: "github",
+                    age: 20,
+                    email: profile.__json.email,
+                    rol: "admin", //cuando pongo usuario no abre con el botón "ingresar con github"?
+                    password: "",
 
-                 let result = await UsersDao.addUser(newUser) //agrega el nuevo usuario a la base de datos.
-                 done(null,result) //indica que la autenticación ha tenido éxito y proporciona el resultado (el nuevo usuario) a Passport.
-             }
-         ////Manejo de Errores:
-             else{
-                 done(null, user)
-             }
-         } catch (error) {
-             return done(error)
-         }
+                }
+
+                let result = await UsersDao.addUser(newUser) //agrega el nuevo usuario a la base de datos.
+                done(null, result) //indica que la autenticación ha tenido éxito y proporciona el resultado (el nuevo usuario) a Passport.
+            }
+            ////Manejo de Errores:
+            else {
+                done(null, user)
+            }
+        } catch (error) {
+            return done(error)
+        }
     }))
 
-}
 
-export default initializaPassport
+
+}
+export { initializaPassport, JwtStrategy };
 
