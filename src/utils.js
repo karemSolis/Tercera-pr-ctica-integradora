@@ -40,41 +40,11 @@ export const authToken = (req, res, next) => {
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-/*
 //-----------------------------------------------------
-// Función para generar usuario
-export const generateUser = async (req, res) => {
-    let products = [];
-
-    for (let i = 0; i < 10000; i++) {
-        products.push(await generateProduct());
-    }
-
-   logger.debug(products);
-
-    return res.send({
-        name: faker.person.firstName(),
-        last_name: faker.person.lastName(),
-        sex: faker.person.sex(),
-        email: faker.internet.email(),
-        job: faker.person.jobTitle(),
-    });
-};
-
-// Función para generar producto
-export const generateProduct = async (req, res) => {
-    return res.send({
-        title: faker.commerce.product(),
-        description: faker.commerce.productDescription(),
-    });
-};
-*/
 
 export const generateUser = () => {
-    // let numOfProducts = parseInt(faker.random.numeric(1, { bannedDigits: ['0'] }))
 
     let products = []
-
 
     for (let i = 0; i < 10; i++) {
         products.push(generateProduct())
@@ -89,7 +59,6 @@ export const generateUser = () => {
         job: faker.person.jobTitle()
     }
 }
-
 
 export const generateProduct = () => {
     return {

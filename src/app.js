@@ -3,7 +3,7 @@ import { engine } from "express-handlebars";
 import mongoose from "mongoose";
 import MongoStore from "connect-mongo"
 import session from 'express-session'
-//import  FileStore  from 'session-file-store';
+
 import passport from "passport";
 import * as path from "path" 
 
@@ -17,7 +17,7 @@ import jwtEstrategy from "./router/jwt.routes.js";
 import userRouter from "./router/users.routes.js";
 import ordersRouter from "./router/orders.router.js";
 import loggerRoutes from "./router/logger.router.js";
-
+import profileRouter from "./router/profile.routes.js";
 
 
 
@@ -88,18 +88,15 @@ app.use(passport.session())
 //ENRUTADORES. 
 
 app.use("/", loggerRoutes);
-
  //Desafío mocking y manejo de errores
- app.use("/api/mockingproducts", userRouter);
-
- 
-app.use("/api/productos", productRouter) 
+app.use("/api/mockingproducts", userRouter);
+app.use("/api/products", productRouter) 
 app.use("/api/carritos", CartRouter);
 app.use("/api/sessions", userRouter)
 app.use("api/sessions/current", userRouter)
 app.use("/api/jwt", jwtEstrategy)
 app.use("/api/orders", ordersRouter)
-
+app.use("api/profiles", profileRouter)
 
 
 //HANDLEBARS
@@ -187,10 +184,10 @@ app.get('/failformRegister', (req, res) => {
 //------------------------------------------------------------------
 
 app.get("/userProfile", async (req, res) => { 
-  if (!req.session.emailUsuario) 
-  {
-      return res.redirect("/login")
-  }
+  // if (!req.session.emailUsuario) 
+  // {
+  //     return res.redirect("/login")
+  // }
   res.render("userProfile", {
       title: "Vista Perfil Usuario",
       first_name: req.session.nomUsuario,
@@ -212,8 +209,16 @@ app.get("/logout", (req, res) => {
   });
 });
 
+//-------------------------------------------------------------------------------------------------
 
-
+app.get("/adminProfile", async (req, res) => {
+  // Renderiza la vista del perfil del administrador
+  res.render("adminProfile", {
+      title: "Perfil del Administrador",
+      adminName: req.session.nomUsuario,
+      // Otros datos necesarios
+  });
+});
 
 
 

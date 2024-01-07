@@ -15,10 +15,23 @@ const usersSchema = new mongoose.Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: "carritos", 
     },
-    role: { type: String, enum: ['user', 'admin', 'premium'], default: 'user' },
+    rol: { type: String, enum: ['user', 'admin', 'premium'], default: 'user' },
     
 });
 
 export const usersModel = mongoose.model(usersCollection, usersSchema);
 
 export default usersModel;
+
+
+/*
+/formRegister:
+{
+    "first_name": "All", 
+    "last_name": "Might", 
+    "email": "allm@gmail.com", 
+    "age": "49", 
+    "password": "123456",
+    "rol": "user"
+}
+ */

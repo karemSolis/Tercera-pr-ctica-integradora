@@ -9,7 +9,7 @@ const UsersDao = new usersDao()
 
 // Endpoint para el registro de usuarios
 jwtEstrategy.post("/formRegister", async (req, res) => {
-    const { name, email, password } = req.body;
+    const { first_name, last_name, email, age, rol, password } = req.body;
     // Validación si existe el usuario
     const exist = await UsersDao.findEmail({ email });
     if (exist) {
@@ -18,16 +18,19 @@ jwtEstrategy.post("/formRegister", async (req, res) => {
 
     // Crear un objeto usuario
     const user = {
-        name,
-        email,
-        password
+    first_name, 
+    last_name, 
+    email, 
+    age, 
+    rol, 
+    password
     };
 
     const result = await UsersDao.addUser(user);
     if (result === 'Error al crear el usuario') {
         return res.status(500).send({ status: 'error', error: result });
     }
-    const access_token = generateToken(user);
+    const access_token = generateToken();
     res.send({ status: "success", access_token });
 });
 
@@ -45,11 +48,36 @@ jwtEstrategy.post("/login", async (req, res) => {
     }
 
     // Crear un token y enviar la respuesta
-    const access_token = generateToken(user);
+    const access_token = generateToken(user );
     logger.debug("Token generado:", access_token);
     res.send({ status: "success", access_token });
 });
 
+jwtEstrategy.get("/current", authToken, async (req, res) => {
+    try {
+    const userResponse = {
+    id: req.user._id,
+    first_name: req.user.first_name,
+    last_name:req.user.last_name,
+    email: req.user.email,
+    age: req.user.age,
+    rol:req.user.rol, 
+    password: req.user.password,
+    };
+    res.send({ status: "success", user: userResponse });
+    } catch (error) {
+    logger.error("Error al obtener el usuario actual:", error);
+    res.status(500).send({ status: "error", error: "Error al obtener el usuario actual" });
+    }
+});
+
+
+export default jwtEstrategy;
+
+
+
+/*
+LA QUE USABA ANTES: 
 jwtEstrategy.get("/current", authToken, async (req, res) => {
     try {
         res.send({ status: "success", payload: req.user });
@@ -57,25 +85,4 @@ jwtEstrategy.get("/current", authToken, async (req, res) => {
         logger.error("Error al obtener el usuario actual:", error);
         res.status(500).send({ status: "error", error: "Error al obtener el usuario actual" });
     }
-});
-
-
-//ejemplo: 
-
-/*  jwtEstrategy.get("/current", authToken, async (req, res) => {
-    try {
-    const userResponse = {
-        id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        // Otros campos necesarios
-    };
-    res.send({ status: "success", user: userResponse });
-    } catch (error) {
-    logger.error("Error al obtener el usuario actual:", error);
-    res.status(500).send({ status: "error", error: "Error al obtener el usuario actual" });
-    }
 });*/
-
-
-export default jwtEstrategy;

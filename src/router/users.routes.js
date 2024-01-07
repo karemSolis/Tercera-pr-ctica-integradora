@@ -17,30 +17,37 @@ const userRouter = Router();
 //const users = new usersDao();
 
 
-userRouter.post("/formRegister", passport.authenticate('formRegister',{failureRedirect:'/login'}), async (req, res) => { 
-    try 
-    {
-        const { first_name, last_name, email, age, password, rol }= req.body
-        if (!first_name || !last_name || !email || !age)  
-        //return res.status(400).send({ status: 400, error: 'Faltan datos' }) 
-//--------------------------------------------------------------------//manejo de errores desafío
-        CustomError.createError({ 
-        name:"error de creación de usuario", 
-        cause:generateUserErrorInfo({first_name, last_name, email, age, password, rol}),
-        message:"",
-        code:EErrors.INVALID_TYPES_ERROR
-        }) 
-//--------------------------------------------------------------------
-        logger.http(`Solicitud POST a /formRegister:: ${JSON.stringify(req.body)}`);
-        res.redirect("/login")
+
+userRouter.post("/formRegister", passport.authenticate('formRegister', { failureRedirect: '/login' }), async (req, res) => {
+    try {
+        const { first_name, last_name, email, age, password, rol } = req.body;
+        if (!first_name || !last_name || !email || !age) {
+            //return res.status(400).send({ status: 400, error: 'Faltan datos' }) 
+            //--------------------------------------------------------------------//manejo de errores desafío
+            CustomError.createError({
+                name: "error de creación de usuario",
+                cause: generateUserErrorInfo({ first_name, last_name, email, age, password, rol }),
+                message: "",
+                code: EErrors.INVALID_TYPES_ERROR
+            })
+            //--------------------------------------------------------------------
+            logger.http(`Solicitud POST a /formRegister:: ${JSON.stringify(req.body)}`);
+            res.redirect("/login");
+        } else {
+            // Resto de la lógica para el registro
+
+            // Después de procesar el formulario, agregar lógica condicional para manejar solicitudes desde Postman
+            if (req.accepts('json')) {
+                res.json({ status: 'success', message: 'Usuario creado correctamente' });
+            } else {
+                res.redirect("/login");
+            }
+        }
     } catch (error) {
         logger.error(`Error al procesar solicitud /formRegister: ${error.message}`);
         res.status(500).send("Error al acceder al registrar: " + error.message);
     }
 })
-
-
-
 
 
 userRouter.get("/failformRegister",async(req,res)=>{
@@ -49,35 +56,27 @@ userRouter.get("/failformRegister",async(req,res)=>{
 })
 
 
-userRouter.post("/login", passport.authenticate('login',{failureRedirect:'/faillogin'}), async (req, res) => {
-    try 
-     {
-        logger.http(`Intento de inicio de sesión fallido: ${JSON.stringify(req.body)}`);
-        if(!req.user)
-        return res.status(400).send({status:"error", error: "Credenciales no validas"})
-
-        logger.http(`Acceso exitoso: ${JSON.stringify(req.user)}`);
-        if(req.user.rol === 'admin'){
-            req.session.emailUsuario = req.user.email
-            req.session.nomUsuario = req.user.first_name
-            req.session.apeUsuario = req.user.last_name
-            req.session.rolUsuario = req.user.rol
-            res.redirect("/userProfile")
-        }
-        else{
-            logger.http(`Usuario normal que inició sesión: ${req.user.email}`);
-            req.session.emailUsuario = req.user.email           
-            req.session.rolUsuario = req.user.rol
-            res.redirect("/products")
-        }
-
-    } 
-    catch (error) 
-    {
-        res.status(500).send("Error al acceder al perfil: " + error.message);
+userRouter.post("/login", passport.authenticate('login', { failureRedirect: '/faillogin' }), async (req, res) => {
+    try {
+      logger.http(`Acceso exitoso: ${JSON.stringify(req.user)}`);
+  
+      if (req.user.rol === 'admin') {
+        req.session.emailUsuario = req.user.email;
+        req.session.nomUsuario = req.user.first_name;
+        req.session.apeUsuario = req.user.last_name;
+        req.session.rolUsuario = req.user.rol;
+        res.redirect("/userProfile");
+      } else {
+        logger.http(`Usuario normal que inició sesión: ${req.user.email}`);
+        req.session.emailUsuario = req.user.email;
+        req.session.rolUsuario = req.user.rol;
+        res.redirect("/products");
+      }
+    } catch (error) {
+      res.status(500).send("Error al acceder al perfil: " + error.message);
     }
-});
-
+  });
+  
 
 
 userRouter.get("/faillogin", (req, res)=>{  //MODIFIQUÉ ACÁ REF.LOGIN
@@ -85,25 +84,49 @@ userRouter.get("/faillogin", (req, res)=>{  //MODIFIQUÉ ACÁ REF.LOGIN
 })
 
 
+/*
 userRouter.get("/userProfile", (req, res) => {
     logger.info("Acceso a la ruta /userProfile");
     logger.info("Valores de sesión:", req.session);
 
-    if (req.session.rolUsuario === 'admin') {
-        logger.info("Redirigiendo a /login debido a rol de administrador");
-        res.redirect("/login");
-    } else {
-        logger.info("Renderizando la vista de perfil");
-        res.render("userProfile", {
-            title: "Perfil de Usuario",
-            first_name: req.session.nomUsuario,
-            last_name: req.session.apeUsuario,
-            email: req.session.emailUsuario,
-            rol: req.session.rolUsuario
- 
-        });
+    let viewName = 'userProfile';  // Vista predeterminada para usuarios normales
+
+    if (req.session.rol === 'admin') {
+        res.redirect("/adminProfile");
+        viewName = 'adminProfile';
+    } else if (req.session.rol === 'premium') {
+        res.redirect("/premiumProfile");
+        viewName = 'premiumProfile';
     }
+    logger.info(`Renderizando la vista: ${viewName}`);
+    res.render(viewName, {
+        title: "Perfil",
+        first_name: req.session.nomUsuario,
+        last_name: req.session.apeUsuario,
+        email: req.session.emailUsuario,
+        rol: req.session.rolUsuario
+    });
 });
+*/
+// userRouter.get("/userProfile", (req, res) => {
+//     logger.info("Acceso a la ruta /userProfile");
+//     logger.info("Valores de sesión:", req.session);
+
+//     if (req.session.rolUsuario === 'admin') {
+//         logger.info("Redirigiendo a /login debido a rol de administrador");
+//         res.redirect("/login");
+//     } else {
+//         logger.info("Renderizando la vista de perfil");
+//         res.render("userProfile", {
+//             title: "Perfil de Usuario",
+//             first_name: req.session.nomUsuario,
+//             last_name: req.session.apeUsuario,
+//             email: req.session.emailUsuario,
+//             rol: req.session.rolUsuario
+ 
+//         });
+//     }
+// });
 
 
 

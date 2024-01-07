@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Administrador</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <h1>Bienvenido, {{first_name}} {{last_name}}!</h1>
+    <p>Rol: {{rol}}</p>
+    
+
+    <h2>Lista de Productos</h2>
+    {{#if products.length}}
+    <ul>
+        {{#each products}}
+        <li>
+            <strong>{{this.name}}</strong>
+            <p>{{this.description}}</p>
+            <p>Precio: {{this.price}}</p>
+            <a href="/products/{{this._id}}">Ver más</a>
+            <a href="#" onclick="deleteProduct('{{this._id}}')">Eliminar</a>
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p>No hay productos disponibles en este momento.</p>
+    {{/if}}
+
+    <h2>Agregar Nuevo Producto</h2>
+    <form action="/api/productos" method="post">
+        <label for="productName">Nombre:</label>
+        <input type="text" id="productName" name="name" required>
+
+        <label for="productDescription">Descripción:</label>
+        <textarea id="productDescription" name="description" required></textarea>
+
+        <label for="productPrice">Precio:</label>
+        <input type="number" id="productPrice" name="price" required>
+
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <script>
+        function deleteProduct(productId) {
+            // Lógica para enviar una solicitud de eliminación al servidor
+        }
+    </script>
+</body>
+
+</html>
