@@ -1,10 +1,12 @@
 
 import GitHubStrategy from "passport-github2"
-import { createHash, isValidPassword } from "../utils.js"
+import { createHash, isValidPassword, authToken, PRIVATE_KEY } from "../utils.js"
 import passport from "passport"
 import local from "passport-local"
 import usersDao from "../DAO/classes/users.dao.js"
 import logger from "../controllers/logger.js"
+import userDTO from "../DAO/DTO/usersDTO.js";
+
 
 import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
 
@@ -15,6 +17,13 @@ const localStrategy = local.Strategy
 
 const UsersDao = new usersDao();
 
+const cookieExtractor = (req) => {
+    let token = null;
+    if (req && req.cookies) {
+      token = req.cookies["token"];
+    }
+    return token;
+  };
 
 const initializaPassport = () => {
     passport.use('formRegister', new localStrategy({ passReqToCallback: true, usernameField: "email" }, async (req, username, password, done) => {
@@ -53,8 +62,8 @@ const initializaPassport = () => {
         done(null, user._id)
     })
 
-    passport.deserializeUser(async (id, done) => {
-        let user = await UsersDao.getUserById(id)
+    passport.deserializeUser(async (_id, done) => {//cam
+        let user = await UsersDao.getUserById(_id) //cam
         done(null, user)
     })
 
@@ -83,21 +92,53 @@ const initializaPassport = () => {
 
     //--------- Estrategia JWT -----------
     passport.use(new JwtStrategy({
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), secretOrKey: 'coderJsonWebToken'}, async (jwtPayload, done) => {
-            
-        try {
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), secretOrKey: 'PRIVATE_KEY'}, 
+        async (jwtPayload, done) => {
+            try {
             // jwtPayload contendrá la información del usuario
             const user = await UsersDao.getUserById(jwtPayload.user._id);
-
+            //const user = authToken.UsersDao.getUserById(jwtPayload.user._id);
             if (!user) {
                 return done(null, false);
             }
-
-            return done(null, user);
+            if (user) {
+                // Si el token es válido, se pasa al siguiente middleware
+                console.log("JWT Strategy - User:", user);
+                return done(null, user);
+            }
         } catch (error) {
             return done(error, false);
         }
     }));
+
+     // Estrategia de autenticación JWT para la sesión actual
+     passport.use(
+        "current",
+        new JwtStrategy(
+            {
+                jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
+                secretOrKey: PRIVATE_KEY,
+            },
+            async (payload, done) => {
+                try {
+                    console.log("Payload en estrategia 'current':", payload);
+                    const user = await userModel.findOne({ email: payload.user.email });
+                    console.log("Usuario encontrado:", user);
+    
+                    if (!user) {
+                        console.log("Usuario no encontrado, se niega el acceso");
+                        // Usuario no encontrado, se niega el acceso
+                        return done(null, false);
+                    }
+    
+                    // Se pasa al siguiente middleware con el objeto UserDTO
+                    return done(null, user);
+                } catch (error) {
+                    return done(error, false);
+                }
+            }
+        )
+    );
 
 
     //_________________ESTRATEGIA DE AUTENTIFICACIÓN DE PASSPORT-GITHUB (GitHubStrategy)________________

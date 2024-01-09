@@ -21,7 +21,7 @@
     "handlebar": "^1.0.0",
     "hbs": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.6.2",
+    "mongoose": "^8.0.3",
     "mongoose-paginate-v2": "^1.7.4",
     "nanoid": "^5.0.2",
     "passport": "^0.6.0",

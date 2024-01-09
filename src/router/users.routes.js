@@ -84,49 +84,6 @@ userRouter.get("/faillogin", (req, res)=>{  //MODIFIQUÉ ACÁ REF.LOGIN
 })
 
 
-/*
-userRouter.get("/userProfile", (req, res) => {
-    logger.info("Acceso a la ruta /userProfile");
-    logger.info("Valores de sesión:", req.session);
-
-    let viewName = 'userProfile';  // Vista predeterminada para usuarios normales
-
-    if (req.session.rol === 'admin') {
-        res.redirect("/adminProfile");
-        viewName = 'adminProfile';
-    } else if (req.session.rol === 'premium') {
-        res.redirect("/premiumProfile");
-        viewName = 'premiumProfile';
-    }
-    logger.info(`Renderizando la vista: ${viewName}`);
-    res.render(viewName, {
-        title: "Perfil",
-        first_name: req.session.nomUsuario,
-        last_name: req.session.apeUsuario,
-        email: req.session.emailUsuario,
-        rol: req.session.rolUsuario
-    });
-});
-*/
-// userRouter.get("/userProfile", (req, res) => {
-//     logger.info("Acceso a la ruta /userProfile");
-//     logger.info("Valores de sesión:", req.session);
-
-//     if (req.session.rolUsuario === 'admin') {
-//         logger.info("Redirigiendo a /login debido a rol de administrador");
-//         res.redirect("/login");
-//     } else {
-//         logger.info("Renderizando la vista de perfil");
-//         res.render("userProfile", {
-//             title: "Perfil de Usuario",
-//             first_name: req.session.nomUsuario,
-//             last_name: req.session.apeUsuario,
-//             email: req.session.emailUsuario,
-//             rol: req.session.rolUsuario
- 
-//         });
-//     }
-// });
 
 
 
@@ -179,3 +136,46 @@ userRouter.post("/", saveUser)
 
 
 export default userRouter;
+/*
+userRouter.get("/userProfile", (req, res) => {
+    logger.info("Acceso a la ruta /userProfile");
+    logger.info("Valores de sesión:", req.session);
+
+    let viewName = 'userProfile';  // Vista predeterminada para usuarios normales
+
+    if (req.session.rol === 'admin') {
+        res.redirect("/adminProfile");
+        viewName = 'adminProfile';
+    } else if (req.session.rol === 'premium') {
+        res.redirect("/premiumProfile");
+        viewName = 'premiumProfile';
+    }
+    logger.info(`Renderizando la vista: ${viewName}`);
+    res.render(viewName, {
+        title: "Perfil",
+        first_name: req.session.nomUsuario,
+        last_name: req.session.apeUsuario,
+        email: req.session.emailUsuario,
+        rol: req.session.rolUsuario
+    });
+});
+*/
+// userRouter.get("/userProfile", (req, res) => {
+//     logger.info("Acceso a la ruta /userProfile");
+//     logger.info("Valores de sesión:", req.session);
+
+//     if (req.session.rolUsuario === 'admin') {
+//         logger.info("Redirigiendo a /login debido a rol de administrador");
+//         res.redirect("/login");
+//     } else {
+//         logger.info("Renderizando la vista de perfil");
+//         res.render("userProfile", {
+//             title: "Perfil de Usuario",
+//             first_name: req.session.nomUsuario,
+//             last_name: req.session.apeUsuario,
+//             email: req.session.emailUsuario,
+//             rol: req.session.rolUsuario
+ 
+//         });
+//     }
+// });

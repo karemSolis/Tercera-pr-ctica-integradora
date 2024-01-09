@@ -3,10 +3,10 @@ import ProductsDao from "../DAO/classes/products.dao.js";
 const productsDaoInstance = new ProductsDao();
 
 export const addProduct = async (req, res) => {
-    const product = req.body;
+    const userId = req.user._id; // Obtén el ID del usuario desde la sesión
 
     try {
-        const result = await productsDaoInstance.addProduct(product);
+        const result = await productsDaoInstance.addProduct(userId, req.body);
         res.status(200).json({ status: "success", result: result });
     } catch (error) {
         console.error("Error al agregar producto:", error);

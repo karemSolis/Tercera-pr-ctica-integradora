@@ -93,8 +93,8 @@ app.use("/api/mockingproducts", userRouter);
 app.use("/api/products", productRouter) 
 app.use("/api/carritos", CartRouter);
 app.use("/api/sessions", userRouter)
-app.use("api/sessions/current", userRouter)
-app.use("/api/jwt", jwtEstrategy)
+//app.use("api/jwt", userRouter)
+app.use("/api/jwt", jwtEstrategy);
 app.use("/api/orders", ordersRouter)
 app.use("api/profiles", profileRouter)
 

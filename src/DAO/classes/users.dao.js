@@ -34,7 +34,7 @@ class usersDao {
     
 
     //actualiza al usuario que ya existe en la base de datos 
-    async updateUser(id, updatedUser) {
+    async updateUser(_id, updatedUser) {
         try {
             const userToUpdate = await this.userModel.findById(id);
 
@@ -55,7 +55,7 @@ class usersDao {
 
 
     //obtiene a todos los usuarios 
-    async getUsers() {
+    async getUsers(_id) {
         try {
             const users = await this.userModel.find({});
             logger.debug("Usuarios obtenidos:", users);
@@ -67,26 +67,14 @@ class usersDao {
     }
 
     //obtienen usuario por su id 
-    async getUserById(id) {
-        // try {
-        //     const user = await this.userModel.findById(id).lean();
+    async getUserById(_id) {
 
-        //     if (!user) {
-
-        //         return 'Usuario no encontrado';
-        //     }
-        //     logger.debug("Usuario obtenido por ID:", user);
-        //     return user;
-        // } catch (error) {
-        //     console.error('Error al obtener usuario por ID:', error);
-        //     return 'Error al obtener usuario por ID: ' + error.message;
-        // }
         try {
-            if (!mongoose.Types.ObjectId.isValidPassword(id)) {
+            if (!mongoose.Types.ObjectId.isValidPassword(_id)) {
                 return "ID de usuario no válido";
             }
     
-            const user = await userModel.findById(id).lean();
+            const user = await userModel.findById(_id).lean();
     
             if (!user) {
                 return "Usuario no encontrado";
@@ -99,9 +87,9 @@ class usersDao {
     }
 
     //borra usuario por su id 
-    async deleteUser(id) {
+    async deleteUser(_id) {
         try {
-            const user = await this.userModel.findById(id);
+            const user = await this.userModel.findById(_id);
 
             if (!user) {
                 return 'Usuario no encontrado';
