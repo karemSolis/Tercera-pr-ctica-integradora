@@ -2,6 +2,8 @@
 import { createHash, isValidPassword } from "../../utils.js";
 import usersModel from "../models/user.js";
 import logger from "../../controllers/logger.js"
+import mongoose from "mongoose";
+
 
 class usersDao {
     constructor() {
@@ -11,21 +13,59 @@ class usersDao {
 
     async addUser(user) {
         try {
-            const { first_name, last_name, email, age, rol } = user;
-            const password = user.password; // Aquí se obtiene la contraseña
-
-            logger.debug("Intentando agregar nuevo usuario:", user);
-
-            const newUser = await this.userModel.create({ first_name, last_name, email, age, rol, password });
-            await newUser.save();
-
+            const newUser = await this.userModel.create(user);
             logger.debug("Usuario creado correctamente:", newUser);
-            return 'Usuario creado correctamente';
+            
+            // Asignar el _id al usuario
+            newUser._id = newUser._id;
+    
+            return newUser; // Devolver el usuario creado
         } catch (error) {
             logger.error('Error al crear el usuario:', error);
-            return 'Error al crear el usuario';
+            return null; // Devolver null en caso de error
         }
     }
+    
+    
+
+    // async addUser(user) {
+    //     try {
+    //         const { first_name, last_name, email, age, rol } = user;
+    //         const password = user.password; // Aquí se obtiene la contraseña
+
+    //         logger.debug("Intentando agregar nuevo usuario:", user);
+
+    //         await this.userModel.create({ first_name, last_name, email, age, rol, password });
+    //         // const newUser = await this.userModel.create({ first_name, last_name, email, age, rol, password });
+    //         // await newUser
+
+    //         console.log("Nuevo usuario a crear:", {
+    //             _id: new mongoose.Types.ObjectId(),
+    //             first_name,
+    //             last_name,
+    //             email,
+    //             age,
+    //             rol,
+    //             password
+    //         });
+            
+    //         const newUser = await this.userModel.create({
+    //             _id: new mongoose.Types.ObjectId(), // Asigna un nuevo _id único
+    //             first_name,
+    //             last_name,
+    //             email,
+    //             age,
+    //             rol,
+    //             password
+    //         });
+
+    //         logger.debug("Usuario creado correctamente:", newUser);
+    //         return 'Usuario creado correctamente';
+    //     } catch (error) {
+    //         logger.error('Error al crear el usuario:', error);
+    //         return 'Error al crear el usuario';
+    //     }
+    // }
     
     async isValidPassword(user, password) {
         return isValidPassword(user, password);
@@ -36,7 +76,7 @@ class usersDao {
     //actualiza al usuario que ya existe en la base de datos 
     async updateUser(_id, updatedUser) {
         try {
-            const userToUpdate = await this.userModel.findById(id);
+            const userToUpdate = await this.userModel.findById(_id);
 
             if (!userToUpdate) {
                 return 'Usuario no encontrado';
@@ -70,11 +110,15 @@ class usersDao {
     async getUserById(_id) {
 
         try {
-            if (!mongoose.Types.ObjectId.isValidPassword(_id)) {
+            //if (!mongoose.Types.ObjectId.isValidPassword(_id)) {
+                console.log("ID recibido:", _id);
+                if (!mongoose.Types.ObjectId.isValid(_id)) {
                 return "ID de usuario no válido";
+                
             }
     
             const user = await userModel.findById(_id).lean();
+            
     
             if (!user) {
                 return "Usuario no encontrado";
@@ -82,7 +126,7 @@ class usersDao {
     
             return user;
         } catch (error) {
-            return "Error al obtener usuario por ID: " + error.message;
+            return "Error al obtener usuario por ID: 2 " + error.message;
         }
     }
 
@@ -106,7 +150,7 @@ class usersDao {
 
     async findUser(email) {
         try {
-            const user = await this.userModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
+            const user = await this.userModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, age: 1, rol: 1 });
 
             if (!user) {
                 return "Usuario no encontrado";
@@ -122,7 +166,7 @@ class usersDao {
     async findEmail(param) {
         try {
             const user = await this.userModel.findOne(param)
-            logger.debug('Usuario encontrado:', user);
+            logger.debug('Usuario encontrado: dao');
             return user;
         } catch (error) {
             console.error('Error al validar usuario', error);

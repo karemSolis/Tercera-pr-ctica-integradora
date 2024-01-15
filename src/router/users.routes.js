@@ -4,7 +4,7 @@ import { createHash, isValidPassword } from "../utils.js"; //MODIFIQUÉ ACÁ REF
 import passport from "passport"; //REF.LOGIN
 import GitHubStrategy from "passport-github2"
 import usersDao from "../DAO/classes/users.dao.js";
-import { getUsers, getUserById, saveUser } from "../controllers/users.controller.js";
+import { getUsers, getUserById, saveUser, } from "../controllers/users.controller.js";
 
 //import { generateUser } from "../controllers/users.controller.js"; //faker
 import {generateUser} from "../utils.js"
@@ -131,7 +131,8 @@ userRouter.get("/mockingproducts", async (req, res) => {
 //-------------------------------------------------
 
 userRouter.get("/", getUsers)
-userRouter.get("/:uid", getUserById)
+userRouter.get("/:_id", getUserById)
+
 userRouter.post("/", saveUser)
 
 

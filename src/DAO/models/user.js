@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const usersCollection = "usuarios";
 
 const usersSchema = new mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
+    //_id: mongoose.Schema.Types.ObjectId,
     first_name: String,
     last_name: String,
     email: {
@@ -11,7 +11,11 @@ const usersSchema = new mongoose.Schema({
         unique: true, //para correo único 
     },
     age: Number,
-    password: String,
+    password: {
+        type: String,
+        required: true,
+        minlength: 6, // Longitud mínima de la contraseña
+    },
     cart: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: "carritos", 

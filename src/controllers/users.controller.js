@@ -15,13 +15,13 @@ export const getUsers = async (req, res) => {
 };
 
 export const getUserById = async (req, res) => {
-    const { uid } = req.params;
+    const { _id } = req.params;
     try {
-        const user = await usersDaoInstance.getUserById(uid);
+        const user = await usersDaoInstance.getUserById(_id);
         res.status(200).json({ status: "success", result: user });
     } catch (error) {
         console.error("Error en getUserById:", error);
-        res.status(500).json({ status: "error", error: "Error al obtener usuario por ID" });
+        res.status(500).json({ status: "error", error: "Error al obtener usuario por ID 1" });
     }
 };
 

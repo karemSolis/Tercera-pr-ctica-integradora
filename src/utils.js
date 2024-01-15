@@ -46,7 +46,7 @@ export const generateToken = (user) => {
 };
 
 
-// export const authToken = (req, res, next) => {
+//     export const authToken = (req, res, next) => {
 //     const autHeader = req.user.authorization
 //     //const autHeader = req.headers.authorization
 //     console.log('No hay encabezado de autorización');
@@ -67,12 +67,16 @@ export const generateToken = (user) => {
 //     })
 
 // }
+
+//_______________________________________________________________________
+
 export const authToken = (req, res, next) => {
   const autHeader = req.headers.authorization;
   const cookieToken = req.cookies.token;
   const urlToken = req.params.token;
 
   const token = autHeader ? autHeader.split(" ")[1] : cookieToken || urlToken;
+  console.log('Token recibido:', token);
 
   if (!token) {
     return res.status(401).send({

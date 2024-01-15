@@ -7,7 +7,7 @@ import userDTO from "../DAO/DTO/usersDTO.js";
 
 const jwtEstrategy = Router();
 
-const UsersDao = new usersDao()
+const usersDaoInstance = new usersDao();
 const productsDaoInstance = new ProductsDao();
 
 
@@ -16,14 +16,14 @@ const productsDaoInstance = new ProductsDao();
 jwtEstrategy.post("/formRegister", async (req, res) => {
     const { first_name, last_name, email, age, rol, password } = req.body;
     // Validación si existe el usuario
-    const exist = await UsersDao.findEmail({ email });
+    const exist = await usersDaoInstance.findEmail({ email });
     if (exist) {
         return res.status(400).send({ error: "El usuario ya existe" });
     }
 
     // Crear un objeto usuario
     const user = {
-    //id,
+
     first_name, 
     last_name, 
     email, 
@@ -33,7 +33,7 @@ jwtEstrategy.post("/formRegister", async (req, res) => {
     };
 
 
-    const result = await UsersDao.addUser(user);
+    const result = await usersDaoInstance.addUser(user);
     if (result === 'Error al crear el usuario') {
         return res.status(500).send({ status: 'error', error: result });
     }
@@ -45,8 +45,8 @@ jwtEstrategy.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // Validar si el email y la contraseña corresponden a un usuario
-    const user = await UsersDao.findEmail({ email });
-    logger.debug('Usuario encontrado:', user);
+    const user = await usersDaoInstance.findEmail({ email });
+    logger.debug(' jwt', user);
     logger.debug('Contraseña proporcionada:', password);
     // Si no existe el usuario, retornar un error
     if (!user || !isValidPassword(user, password)) {
@@ -55,15 +55,16 @@ jwtEstrategy.post("/login", async (req, res) => {
     }
     // Crear un token y enviar la respuesta
     const access_token = generateToken(user);
-    console.log(access_token)
+    console.log('Token generado en /login:', access_token);
+
     logger.info("Token generado:", access_token);
     res.send({ status: "success", token: access_token });
 });
 
-jwtEstrategy.get("current", authToken, async (req, res) => {
+jwtEstrategy.get("/current", authToken, async (req, res) => {
     try {
         const userDTO = {
-            id: req.user._id,
+            _id: req.user._id,
             first_name: req.user.first_name,
             last_name: req.user.last_name,
             email: req.user.email,
