@@ -28,7 +28,7 @@ const cookieExtractor = (req) => {
     return token;
   };
 
-const initializaPassport = () => {
+const initializaPassport = (app) => {
 
         passport.use('formRegister', new localStrategy({ passReqToCallback: true, usernameField: "email" }, async (req, username, password, done) => {
             console.log("Ejecutando formRegister strategy");
@@ -62,47 +62,11 @@ const initializaPassport = () => {
         }))
         
 
-    
-    // passport.use('formRegister', new localStrategy({ passReqToCallback: true, usernameField: "email" }, async (req, username, password, done) => {
-    //     console.log("Ejecutando formRegister strategy");
-    //     const { first_name, last_name, email, age, rol } = req.body;
-
-    //     try {
-    //         let user = await usersDaoInstance.findEmail({ email: username });
-
-    //         //if (user !== undefined) {
-    //         if (user) {
-    //             logger.debug("El usuario ya está registrado");
-    //             return done(null, false);
-    //         }
-
-    //         const hashedPassword = await createHash(password); // Aquí se hashea la contraseña
-            
-    //         const newUser = { first_name, last_name, email, age, rol, password: hashedPassword };
-
-    //         const result = await usersDaoInstance.addUser(newUser);
-    //         if (result === 'Usuario creado correctamente') {
-    //             // Usuario creado con éxito
-    //             return done(null, user);
-    //         } else {
-    //             return done(null, false);
-    //         }
-    //     } catch (error) {
-    //         logger.error('Error al registrar usuario:', error);
-    //         return done(error);
-    //     }
-    // }))
-
-
     passport.serializeUser((user, done) => {
         console.log("Serializando usuario desde passport, _id:", user._id);
         done(null, user._id || user.id); // Intenta utilizar user.id si user._id es undefined
     });
-    // passport.serializeUser((user, done) => {
-    //     console.log("Serializando usuario desde passport, _id:", user._id);
-    //     done(null, user._id)
-    // })
-    
+
     passport.deserializeUser(async (_id, done) => {
         try {
             let user = await usersDaoInstance.getUserById(_id);
@@ -113,11 +77,6 @@ const initializaPassport = () => {
         }
     });
     
-    // passport.deserializeUser(async (_id, done) => {//cam
-    //     let user = await usersDaoInstance.getUserById(_id) //cam
-    //     done(null, user)
-    // })
-
     passport.use('login', new localStrategy({ usernameField: "email" }, async (username, password, done) => {
         console.log("Ejecutando login strategy");
 
@@ -189,7 +148,24 @@ const initializaPassport = () => {
                 }
             }
         )
+
+        
     );
+
+    // Manejo de errores de Passport
+    passport.use("errores", (err, req, res, next) => {
+    if (err.name === 'UnauthorizedError') {
+      // Error de autenticación JWT no válida
+      return res.status(401).json({ error: 'Token no válido' });
+    }
+  
+    // Otros errores
+    console.error('Error en el middleware:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  });
+
+
+    
 
 
     //_________________ESTRATEGIA DE AUTENTIFICACIÓN DE PASSPORT-GITHUB (GitHubStrategy)________________
@@ -238,5 +214,6 @@ const initializaPassport = () => {
 
 
 }
+
 export { initializaPassport, JwtStrategy };
 

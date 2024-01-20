@@ -1,11 +1,13 @@
 
 import productModel from "../models/products.js"
+import usersDao from "../classes/users.dao.js"
 
 
+const usersDaoInstance = new usersDao();
 class ProductsDao {
     async addProduct(userId, product) {
         try {
-            const userIsAdmin = UsersDao.isUserAdmin(userId);
+            const userIsAdmin = usersDaoInstance.isUserAdmin(userId);
 
             // Verifica si el usuario es premium o admin para asignar el owner
             const owner = userIsAdmin ? 'admin' : userId;
@@ -50,7 +52,7 @@ class ProductsDao {
         }
         
         // Función para obtener el rol del usuario desde el token (ejemplo)
-        getUserRolFromToken(userId) {
+        getUserRolFromToken(token) {
             const decodedToken = jwt.verify(token, 'tu_secreto');
             return decodedToken.user.rol;
         }
@@ -68,7 +70,7 @@ class ProductsDao {
             if (
                 userId.toString() !== existingProduct.owner.toString() &&
                 // Agrega la lógica para permitir a un admin editar cualquier producto
-                !isUserAdmin(userId)
+                !ProductsDao.isUserAdminStatic(userId)
             ) {
                 return "No tienes permisos para actualizar este producto";
             }

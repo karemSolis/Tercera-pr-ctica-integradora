@@ -1,4 +1,6 @@
 import ProductsDao from "../DAO/classes/products.dao.js";
+import productModel from "../DAO/models/products.js"
+import { isUserAdmin } from "../DAO/classes/products.dao.js";
 
 const productsDaoInstance = new ProductsDao();
 
@@ -41,12 +43,51 @@ export const updateProduct = async (req, res) => {
     const updatedProduct = req.body;
 
     try {
-        const result = await productsDaoInstance.updateProduct(productId, updatedProduct);
-        res.status(200).json({ status: "success", result: result });
+        // Obtén el ID del usuario desde la sesión
+        const userId = req.user._id;
+
+        // Verifica si el usuario es administrador
+        const userIsAdmin = isUserAdmin(userId);
+
+        // Busca el producto existente por su ID
+        const existingProduct = await productModel.findById(productId);
+
+        if (!existingProduct) {
+            return res.status(404).json({ status: "error", error: "No se encuentra producto" });
+        }
+
+        // Verifica los permisos del usuario
+        if (
+            userId.toString() !== existingProduct.owner.toString() &&
+            !userIsAdmin
+        ) {
+            return res.status(403).json({ status: "error", error: "No tienes permisos para actualizar este producto" });
+        }
+
+        // Realiza la actualización del producto
+        const updatedProductResult = await productModel.findByIdAndUpdate(
+            productId,
+            updatedProduct,
+            { new: true }
+        );
+
+        if (!updatedProductResult) {
+            return res.status(404).json({ status: "error", error: "No se encuentra producto" });
+        }
+
+        return res.status(200).json({ status: "success", result: "Producto actualizado" });
     } catch (error) {
         console.error("Error al actualizar producto:", error);
-        res.status(500).json({ status: "error", error: "Error al actualizar producto" });
+        return res.status(500).json({ status: "error", error: "Error al actualizar producto" });
     }
+
+    // try {
+    //     const result = await productsDaoInstance.updateProduct(productId, updatedProduct);
+    //     res.status(200).json({ status: "success", result: result });
+    // } catch (error) {
+    //     console.error("Error al actualizar producto:", error);
+    //     res.status(500).json({ status: "error", error: "Error al actualizar producto" });
+    // }
 };
 
 export const deleteProduct = async (req, res) => {

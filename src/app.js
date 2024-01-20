@@ -30,7 +30,10 @@ import logger from "./controllers/logger.js";
 
 
 
+
 const app = express(); 
+
+initializaPassport(app);
 
 const product = new ProductsDao();
 const carts = new CartDao();
