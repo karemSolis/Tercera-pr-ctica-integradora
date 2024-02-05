@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import {initializaPassport} from "../config/passport.config.js";
 import ProductModel from "../DAO/models/products.js";
 import ProductsDao from "../DAO/classes/products.dao.js";
 import { authToken, isProductOwner } from "../utils.js"
@@ -7,9 +8,18 @@ import { authToken, isProductOwner } from "../utils.js"
 const productsDaoInstance = new ProductsDao();
 const productRouter = Router();
 
+
 // Middleware de autenticación con Passport JWT
 productRouter.use(passport.authenticate('jwt', { session: false }));
 
+productRouter.get("/products", passport.authenticate('jwt', { session: false }), async (req, res) => { //Cuando se realiza una solicitud GET a la ruta "/", la función de middleware asociada se ejecuta
+  try {
+    const products = await productsDaoInstance.getProducts();
+    res.render("/products", { products }); // Pasa la lista de productos a la vista
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener los productos" });
+  }
+});
 // Rutas protegidas
 productRouter.get("/:id", async (req, res) => {
   try {
@@ -24,17 +34,11 @@ productRouter.get("/:id", async (req, res) => {
   }
 });
 
-productRouter.get("/", async (req, res) => {
-  try {
-    const products = await productsDaoInstance.getProducts();
-    res.render("products", { products }); // Pasa la lista de productos a la vista
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener los productos" });
-  }
-});
+
 
 productRouter.post("/", async (req, res) => {
-  const userId = req.user._id; // Obtén el ID del usuario desde la sesión
+  const userId = req.user._id; 
+  passport.authenticate('jwt', { session: false })
 
   try {
     const result = await productsDaoInstance.addProduct(userId, req.body);

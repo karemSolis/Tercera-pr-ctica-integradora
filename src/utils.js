@@ -12,13 +12,6 @@ export const createHash = password =>{
     return bcrypt.hashSync(password, bcrypt.genSaltSync(10))
 } 
 
-// export const isValidPassword = (user, password) => {
-//     logger.info('Ejecutando isValidPassword');
-//     console.log('Ejecutando isValidPassword');
-//     return bcrypt.compareSync(password, user.password || ''); // Agregamos el manejo para contraseña nula
-// };
-
-
 export const isValidPassword = (user, password) => {
   logger.info('Ejecutando isValidPassword');
   try {
@@ -34,7 +27,6 @@ export const isValidPassword = (user, password) => {
   }
 };
 
-
 //const PRIVATE_KEY = "coderJsonWebToken"
 export const PRIVATE_KEY = process.env.PRIVATE_KEY || "defaultFallbackValue";
 
@@ -45,30 +37,6 @@ export const generateToken = (user) => {
     return token;
 };
 
-
-//     export const authToken = (req, res, next) => {
-//     const autHeader = req.user.authorization
-//     //const autHeader = req.headers.authorization
-//     console.log('No hay encabezado de autorización');
-//     if (!autHeader) return res.status(401).send({
-//         error: "No autorizado"
-//     })
-
-//     const token = autHeader.split(" ")[1]
-
-//     jwt.verify(token, PRIVATE_KEY, (error, credential) => {
-//         if (error.name === 'TokenExpiró') {
-//         console.log('Error en la verificación del token:', error);
-//         return res.status(403).send({ error: "No autorizado" })
-//     }
-//         req.user = credential.user
-//         console.log('Token verificado correctamente')
-//         next()
-//     })
-
-// }
-
-//_______________________________________________________________________
 
 export const authToken = (req, res, next) => {
   const autHeader = req.headers.authorization;
@@ -85,6 +53,7 @@ export const authToken = (req, res, next) => {
   }
 
   jwt.verify(token, PRIVATE_KEY, (error, credential) => {
+    
     if (error) {
       console.error('Error al verificar el token:', error);
       if (error.name === 'TokenExpiredError') {

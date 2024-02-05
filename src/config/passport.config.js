@@ -1,4 +1,3 @@
-
 import GitHubStrategy from "passport-github2"
 import { createHash, isValidPassword, authToken, PRIVATE_KEY } from "../utils.js"
 import passport from "passport"
@@ -7,18 +6,7 @@ import usersDao from "../DAO/classes/users.dao.js"
 import logger from "../controllers/logger.js"
 import usersModel from "../DAO/models/user.js";
 import mongoose from 'mongoose';
-
-
 import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
-
-
-
-
-const localStrategy = local.Strategy
-
-
-const usersDaoInstance = new usersDao();
-
 
 const cookieExtractor = (req) => {
     let token = null;
@@ -28,39 +16,13 @@ const cookieExtractor = (req) => {
     return token;
   };
 
-const initializaPassport = (app) => {
 
-        passport.use('formRegister', new localStrategy({ passReqToCallback: true, usernameField: "email" }, async (req, username, password, done) => {
-            console.log("Ejecutando formRegister strategy");
-            const { first_name, last_name, email, age, rol } = req.body;
-    
-            try {
-                let user = await usersDaoInstance.findEmail({ email: username });
-    
-                if (user) {
-                    logger.debug("El usuario ya está registrado");
-                    return done(null, false);
-                }
-    
-                const hashedPassword = await createHash(password);
-    
-                const newUser = { _id: new mongoose.Types.ObjectId(), first_name, last_name, email, age, rol, password: hashedPassword };
-    
-                const result = await usersDaoInstance.addUser(newUser);
-    
-                if (result === 'Usuario creado correctamente') {
-                    // Usuario creado con éxito
-                    newUser._id = result._id;
-                    return done(null, newUser);
-                } else {
-                    return done(null, false);
-                }
-            } catch (error) {
-                logger.error('Error al registrar usuario:', error);
-                return done(error);
-            }
-        }))
-        
+// const localStrategy = local.Strategy
+const usersDaoInstance = new usersDao();
+
+
+
+const initializaPassport = () => {
 
     passport.serializeUser((user, done) => {
         console.log("Serializando usuario desde passport, _id:", user._id);
@@ -77,31 +39,10 @@ const initializaPassport = (app) => {
         }
     });
     
-    passport.use('login', new localStrategy({ usernameField: "email" }, async (username, password, done) => {
-        console.log("Ejecutando login strategy");
 
-        try {
-            const user = await usersDaoInstance.findEmail({ email: username });
-            if (!user) {
-                logger.debug("No se encuentra al usuario o no existe");
-                return done(null, false);
-            }
-
-
-            if (!isValidPassword(user, password)) {
-                logger.debug("La contraseña no es válida");
-                return done(null, false);
-            }
-
-
-            return done(null, user);
-        } catch (error) {
-            return done(error);
-        }
-    }));
 
     //--------- Estrategia JWT -----------
-    passport.use(new JwtStrategy({
+    passport.use("jwt", new JwtStrategy({
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), secretOrKey:process.env.PRIVATE_KEY}, 
         async (jwtPayload, done) => {
             try {
@@ -128,6 +69,7 @@ const initializaPassport = (app) => {
             {
                 jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
                 secretOrKey: process.env.PRIVATE_KEY,
+                //secretOrKey: process.env.PRIVATE_KEY,
             },
             async (payload, done) => {
                 try {
@@ -216,4 +158,3 @@ const initializaPassport = (app) => {
 }
 
 export { initializaPassport, JwtStrategy };
-

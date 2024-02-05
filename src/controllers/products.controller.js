@@ -1,9 +1,18 @@
 import ProductsDao from "../DAO/classes/products.dao.js";
-import productModel from "../DAO/models/products.js"
+import productModel from "../DAO/models/products.js";
 import { isUserAdmin } from "../DAO/classes/products.dao.js";
 
 const productsDaoInstance = new ProductsDao();
 
+export const getProducts = async (req, res) => {
+    try {
+        const result = await productsDaoInstance.getProducts();
+        res.status(200).json({ status: "success", result: result });
+    } catch (error) {
+        console.error("Error al obtener productos:", error);
+        res.status(500).json({ status: "error", error: "No se puede obtener productos" });
+    }
+};
 export const addProduct = async (req, res) => {
     const userId = req.user._id; // Obtén el ID del usuario desde la sesión
 
@@ -13,16 +22,6 @@ export const addProduct = async (req, res) => {
     } catch (error) {
         console.error("Error al agregar producto:", error);
         res.status(500).json({ status: "error", error: "No se puede agregar producto" });
-    }
-};
-
-export const getProducts = async (req, res) => {
-    try {
-        const result = await productsDaoInstance.getProducts();
-        res.status(200).json({ status: "success", result: result });
-    } catch (error) {
-        console.error("Error al obtener productos:", error);
-        res.status(500).json({ status: "error", error: "No se puede obtener productos" });
     }
 };
 
@@ -81,13 +80,6 @@ export const updateProduct = async (req, res) => {
         return res.status(500).json({ status: "error", error: "Error al actualizar producto" });
     }
 
-    // try {
-    //     const result = await productsDaoInstance.updateProduct(productId, updatedProduct);
-    //     res.status(200).json({ status: "success", result: result });
-    // } catch (error) {
-    //     console.error("Error al actualizar producto:", error);
-    //     res.status(500).json({ status: "error", error: "Error al actualizar producto" });
-    // }
 };
 
 export const deleteProduct = async (req, res) => {

@@ -3,6 +3,7 @@ import { engine } from "express-handlebars";
 import mongoose from "mongoose";
 import MongoStore from "connect-mongo"
 import session from 'express-session'
+import dotenv from "dotenv";
 
 import passport from "passport";
 import * as path from "path" 
@@ -33,23 +34,16 @@ import logger from "./controllers/logger.js";
 
 const app = express(); 
 
-initializaPassport(app);
-
 const product = new ProductsDao();
 const carts = new CartDao();
 //const userManager = new UserManager();
-
-
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 //---------------------------------------------------------------
 
-app.listen(config.port, () => {
-    logger.info(`Servidor corriendo en el puerto ${config.port}`);
-});
+dotenv.config(); // Cargar variables de entorno desde el archivo .env
 
 mongoose.connect(config.mongoUrl)
 .then(()=> {
@@ -59,6 +53,9 @@ mongoose.connect(config.mongoUrl)
     logger.info("No se puede conectar con Atlas, error"+ error)
 })
 
+app.listen(config.port, () => {
+    logger.info(`Servidor corriendo en el puerto ${config.port}`);
+});
 
 const sessionOptions = {
   store: MongoStore.create({
@@ -68,7 +65,8 @@ const sessionOptions = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
-    ttl: 600
+    ttl: 600,
+    serverSelectionTimeoutMS: 30000,
   }),
   secret: process.env.SESSION_SECRET,
   resave: process.env.SESSION_RESAVE === 'true',
@@ -85,8 +83,6 @@ app.use(session(sessionOptions));
 initializaPassport()
 app.use(passport.initialize())
 app.use(passport.session())
-
-
 
 //ENRUTADORES. 
 

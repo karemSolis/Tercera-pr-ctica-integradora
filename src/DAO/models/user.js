@@ -13,7 +13,7 @@ const usersSchema = new mongoose.Schema({
     age: Number,
     password: {
         type: String,
-        required: true,
+        required: false,
         minlength: 6, // Longitud mínima de la contraseña
     },
     cart: {
@@ -30,7 +30,7 @@ export default usersModel;
 
 
 /*
-/formRegister:
+http://localhost:8080/api/jwt/formRegister POST
 {
     "first_name": "All", 
     "last_name": "Might", 
@@ -40,3 +40,11 @@ export default usersModel;
     "rol": "user"
 }
  */
+
+/*
+http://localhost:8080/api/jwt/login POST
+{
+    "email": "allm@gmail.com", 
+    "password": "123456"
+}
+*/

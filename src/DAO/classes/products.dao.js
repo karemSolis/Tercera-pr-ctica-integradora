@@ -1,14 +1,25 @@
+//IMPORTACIÓN DE MÓDULOS NECESARIOS PARA PRODUCTS.DAO.JS 
+import productModel from "../models/products.js" // BASE DE DATOS 
+import usersDao from "../classes/users.dao.js"// CLASE DAO PARA MANEJAR LOS USUARIOS
 
-import productModel from "../models/products.js"
-import usersDao from "../classes/users.dao.js"
 
+const usersDaoInstance = new usersDao(); //CREACIÓN DE LA CLASE USERSDAO PARA LLAMAR MÉTODOS DE USERS.DAO.JS
+class ProductsDao { //ESTA CLASE CONTENDRÁ LOS MÉTODOS PARA INTERACTUAR CON LA COLECCIÓN DE LOS PRODUCTOS EN LA BASE DE DATOS 
 
-const usersDaoInstance = new usersDao();
-class ProductsDao {
-    async addProduct(userId, product) {
+    async getProducts() {
         try {
-            const userIsAdmin = usersDaoInstance.isUserAdmin(userId);
+            const products = await productModel.find();
+            return products;
+        } catch (error) {
+            return "No se puede obtener producto";
+        }
+    }
 
+    async addProduct(userId, product) { //ADDPRODUCT AGREGA UN NUEVO PRODUCTO A LA BASE DE DATOS,
+    //TOMA EL ID DEL USER QUE ESTÁ AGREGANDO EL PRODUCTO Y LOS DETALLES DEL PRODUCTO COMO PARÁMETROS 
+        try { //TRY Y CATCH SE UNSAN PARA MANEJAR ERRORES POTENCIALES QUE PUEDEN OCURRIR DURANTE LA EJECUCIÓN DEL CÓDIGO DENTRO DEL BLOQUE. 
+            const userIsAdmin = usersDaoInstance.isUserAdmin(userId);////NO EXISTE EL MÉTODO ISuSERaDMIN, SI ESTUIERA DEBERÍA VERIFICAR SI EL USUARPIO QUE ESTÁ AGREGANDO 
+            //EL PRODUCTO ES ES UN ADMINISTRADOR. ESTO SUGUIERE QUE USERDAOINSTANCE ES UNA INSTANCIA DE UN DAO QUE MANEJA USUARIOS Y SU LÓGICA. 
             // Verifica si el usuario es premium o admin para asignar el owner
             const owner = userIsAdmin ? 'admin' : userId;
 
@@ -18,18 +29,6 @@ class ProductsDao {
             return "Producto agregado";
         } catch (error) {
             return "No se puede agregar producto";
-        }
-    }
-
-
-
-
-    async getProducts() {
-        try {
-            const products = await productModel.find().lean();
-            return products;
-        } catch (error) {
-            return "No se puede obtener producto";
         }
     }
 
@@ -93,7 +92,6 @@ class ProductsDao {
 
     }
 
-
     async deleteProduct(userId, productId) {
         try {
             const existingProduct = await productModel.findById(productId);
@@ -119,9 +117,6 @@ class ProductsDao {
         }
     }
 
-
-
-
     async exist(productId) {
         try {
             const product = await productModel.findById(productId).lean();
@@ -132,37 +127,4 @@ class ProductsDao {
     }
 }
 
-
-
-
-
 export default ProductsDao;
-
-
-//FUNCIÓNES QUE USABA ANTES DE DEFINIR LOS ROLES: 
-
-    /*async updateProduct(productId, product) {
-        try {
-            const updatedProduct = await productModel.findByIdAndUpdate(productId, product, { new: true });
-            if (!updatedProduct) return "No se encuentra producto";
-            return "Producto actualizado";
-        } catch (error) {
-            return "Error al actualizar el producto";
-        }
-    }*/
-
-
-/*
-    async deleteProduct(productId) {
-        try {
-            const deletedProduct = await productModel.findByIdAndRemove(productId);
-            if (!deletedProduct) return "No se encontró el producto";
-            return "Producto eliminado";
-        } catch (error) {
-            return "No se puede eliminar producto";
-        }
-    }
-*/            
-
-//LÍNEA 100 Agrega la lógica para permitir a un admin borrar cualquier producto
-//lÍNEA 101 Aquí deberías tener una lógica para determinar si el usuario es un admin
